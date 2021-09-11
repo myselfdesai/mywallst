@@ -19,23 +19,28 @@ domain_url = 'http://localhost:5000'
 
 @app.route('/')
 def index():
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="subscription",
-        line_items=[
-            {
-                "price": stripe_keys["price_id"],
-                "quantity": 1,
-            }
-        ],
-        success_url=url_for('success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=url_for('index', _external=True),
-    )
     return render_template(
-        'index.html',
-        checkout_session_id=session['id'],
-        checkout_public_key=stripe_keys["publishable_key"]
+        'index.html'
     )
+
+@app.route('/stripe_subscription')
+def stripe_subscription():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            line_items=[
+                {
+                    "price": stripe_keys["price_id"],
+                    "quantity": 1,
+                }
+            ],
+            success_url=url_for('success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('index', _external=True)
+        )
+        return jsonify({"checkout_session_id": checkout_session['id'],"checkout_public_key": stripe_keys['publishable_key'] })
+    except Exception as e:
+        return jsonify(error=str(e)), 403
 
 @app.route('/success')
 def success():

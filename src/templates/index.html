@@ -26,24 +26,20 @@
             </li>
           </ul>
         </nav>
-        <h3 class="text-muted">Store</h3>
+        <h3 class="text-muted">mywallst</h3>
       </div>
 
       <div class="jumbotron">
         <h1 class="display-3">The Product</h1>
-        <p class="lead">Purchase The Product for only $10.</p>
+        <p class="lead">Subscribe The Product for only €10.</p>
         <a href="#" id="buy_now_btn" class="btn btn-primary">Subscribe</a>
       </div>
 
       <footer class="footer">
-        <p>&copy; Store 2017</p>
+        <p>&copy; mywallst 2021</p>
       </footer>
       <script src="https://js.stripe.com/v3/"></script>
-      <script>
-        const checkout_public_key = '{{checkout_public_key}}';
-        const checkout_session_id = '{{checkout_session_id}}';
-      </script>
-      <script src="{{ url_for('static', filename='script-no-ajax.js') }}"></script>
+      <script src="{{ url_for('static', filename='script-ajax.js') }}"></script>
 
     </div> <!-- /container -->
   </body>
