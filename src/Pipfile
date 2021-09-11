@@ -8,6 +8,7 @@ flask = "*"
 flask-sqlalchemy = "==2.4.1"
 stripe = "*"
 flask-marshmallow = "*"
+flask-bootstrap = "*"
 
 [requires]
 python_version = "3.6"

@@ -1,10 +1,15 @@
 import os
 import stripe
 from flask import Flask, jsonify, render_template, request, url_for
+from flask_bootstrap import Bootstrap
+# from flask_wtf import FlaskForm
+# from wtforms import StringField, PasswordField, BooleanField
+# from wtforms.validators import InputRequired, Email, Length
 
 # Init app
 app = Flask(__name__)
 # basedir = os.path.abspath(os.path.dirname(__file__))
+Bootstrap(app)
 
 stripe_keys = {
     "secret_key": os.environ["STRIPE_SECRET_KEY"],
@@ -22,6 +27,14 @@ def index():
     return render_template(
         'index.html'
     )
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
 
 @app.route('/stripe_subscription')
 def stripe_subscription():
