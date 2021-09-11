@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 flask = "*"
+flask-sqlalchemy = "==2.4.1"
+stripe = "*"
+flask-marshmallow = "*"
 
 [requires]
 python_version = "3.6"
