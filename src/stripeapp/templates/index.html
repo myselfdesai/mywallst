@@ -20,11 +20,11 @@ Demo App
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Mywallst</a>
+          <a class="navbar-brand" href="{{ url_for('index') }}">Mywallst</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
+            <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('login') }}">Login</a></li>
             <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
             <li></li>
@@ -37,9 +37,15 @@ Demo App
     <div class="container">
       <div class="jumbotron">
         <h3>User logged in as : {{email}} </h3>
+        {% if is_stripe_subscribed is sameas true %}
+        <h1 class="display-3">The Product</h1>
+        <p class="lead">Subscribe The Product for only €10.</p>
+        <h3 class="display-3">The Product already subscibed </h3>
+        {% else %}
         <h1 class="display-3">The Product</h1>
         <p class="lead">Subscribe The Product for only €10.</p>
         <a href="#" id="buy_now_btn" class="btn btn-primary">Subscribe</a>
+        {% endif %}
       </div>
 
       <footer class="footer">

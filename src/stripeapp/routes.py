@@ -1,6 +1,6 @@
 import os
 import stripe
-from flask import jsonify, render_template, url_for, redirect
+from flask import jsonify, render_template, url_for, redirect, request, abort
 from stripeapp import app, db
 from stripeapp.forms import LoginForm, RegisterForm
 from stripeapp.models import User, StripeCustomer
@@ -15,7 +15,6 @@ stripe_keys = {
 
 stripe.api_key = stripe_keys["secret_key"]
 
-domain_url = 'http://localhost:5000'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -28,7 +27,12 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', email=current_user.email)
+    stripe_customer_data = StripeCustomer.query.filter_by(user_id=current_user.id).first()
+    if stripe_customer_data:
+        stripe_subscribed = True
+    else:
+        stripe_subscribed = False
+    return render_template('index.html', email=current_user.email, is_stripe_subscribed=stripe_subscribed)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -69,6 +73,7 @@ def stripe_subscription():
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="subscription",
+            customer_email= current_user.email,
             line_items=[
                 {
                     "price": stripe_keys["price_id"],
@@ -85,3 +90,42 @@ def stripe_subscription():
 @app.route('/success')
 def success():
     return render_template('success.html')
+
+@app.route('/stripe_webhook', methods=['POST'])
+def stripe_webhook():
+
+    if request.content_length > 1024 * 1024:
+        print('REQUEST TOO BIG and Invalid')
+        abort(400)
+
+    payload = request.data
+    endpoint_secret = app.config['STRIPE_ENDPOINT_SECRET']
+    sig_header = request.headers.get('stripe-signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return jsonify({'error': str(e)})
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return jsonify({'error': str(e)})
+
+    if event["type"] == "checkout.session.completed":
+        session = event.data.object
+        handle_checkout_session(session)
+
+    return jsonify({'status': 'success'})
+
+
+def handle_checkout_session(session):
+    user = User.query.filter_by(email=session['customer_details']['email']).first()
+    if user:
+        new_subscription = StripeCustomer(user_id=user.id, stripe_customer_id=session['customer'], stripe_subscription_id=session['subscription'] )
+        db.session.add(new_subscription)
+        db.session.commit()
+        print("Subscription was successful.")
+    else:
+        print("please provide valid email")
