@@ -20,6 +20,7 @@ Login
         {{ wtf.form_field(form.password) }}
         {{ wtf.form_field(form.remember) }}
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <h4>if new customer : <a href="{{ url_for('signup') }}">Sign Up</a></h4>
       </form>
 
     </div> <!-- /container -->

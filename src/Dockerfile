@@ -1,12 +1,13 @@
-FROM python:3.6-slim as builder
-COPY . /src
-RUN pip install --user fastapi uvicorn boto3 flask
+FROM python:3.6
 
-FROM python:3.6-slim as app
-COPY --from=builder /root/.local /root/.local
-COPY --from=builder /src .
+RUN apt-get update && \
+    pip install pipenv
 
-ENV PATH=/root/.local:$PATH
-EXPOSE 5000
+#Set the working directory to src
+WORKDIR /src
 
-CMD ["python3", "app.py"]
+ADD . /src
+
+RUN pipenv install --system --deploy --ignore-pipfile
+
+CMD ["python", "run.py"]
