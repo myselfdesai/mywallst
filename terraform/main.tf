@@ -63,40 +63,21 @@ resource "aws_iam_role_policy_attachment" "ecsTaskExecutionRole_policy" {
 
 #creating the service
 resource "aws_ecs_service" "mywallst-flask-service" {
-  name            = "mywallst-flask-service"                               # Naming our first service
-  cluster         = "${aws_ecs_cluster.flask-mywallst-app.id}"             # Referencing our created Cluster
-  task_definition = "${aws_ecs_task_definition.flask-mywallst-task.arn}"   # Referencing the task our service will spin up
-  launch_type     = "FARGATE"
-  desired_count   = 2 # Setting the number of containers we want deployed to 3
+   name            = "mywallst-flask-service"                               # Naming our first service
+   cluster         = "${aws_ecs_cluster.flask-mywallst-app.id}"             # Referencing our created Cluster
+   task_definition = "${aws_ecs_task_definition.flask-mywallst-task.arn}"   # Referencing the task our service will spin up
+   launch_type     = "FARGATE"
+   desired_count   = 2 # Setting the number of containers we want deployed to 3
 
-  network_configuration {
-    subnets          = ["${aws_default_subnet.default_subnet_a.id}", "${aws_default_subnet.default_subnet_b.id}", "${aws_default_subnet.default_subnet_c.id}"]
-    assign_public_ip = true # Providing our containers with public IPs
-  }
+   load_balancer {
+    target_group_arn = "${aws_lb_target_group.mywallst-target-group.arn}" # Referencing our target group
+    container_name   = "${aws_ecs_task_definition.flask-mywallst-task.family}"
+    container_port   = 5000 # Specifying the container port
+   }
 
-
+   network_configuration {
+      subnets          = ["${aws_default_subnet.default_subnet_a.id}", "${aws_default_subnet.default_subnet_b.id}", "${aws_default_subnet.default_subnet_c.id}"]
+      assign_public_ip = true # Providing our containers with public IPs
+   }
 }
 
-# resource "aws_ecs_service" "flask-service" {
-#   name = "flask-app-service"
-#   cluster = aws_ecs_cluster.fp-ecs-cluster.id
-#   task_definition = aws_ecs_task_definition.fp-ecs-task.arn
-#   desired_count = 2
-#   launch_type = "FARGATE"
-
-#   network_configuration {
-#     security_groups = [aws_security_group.fp-ecs-sg.id]
-#     subnets = aws_subnet.fp-public-subnets.*.id
-#     assign_public_ip = true
-#   }
-
-#   load_balancer {
-#     container_name = "flask-app"
-#     container_port = var.flask_app_port
-#     target_group_arn = aws_alb_target_group.fp-target-group.id
-#   }
-
-#   depends_on = [
-#     aws_alb_listener.fp-alb-listener
-#   ]
-# }
