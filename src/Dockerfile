@@ -1,4 +1,5 @@
-FROM python:3.6
+
+FROM python:3.6 as builder
 
 RUN apt-get update && \
     pip install pipenv
@@ -6,8 +7,10 @@ RUN apt-get update && \
 #Set the working directory to src
 WORKDIR /src
 
-ADD . /src
+COPY . /src
 
 RUN pipenv install --system --deploy --ignore-pipfile
+
+EXPOSE 5000
 
 CMD ["python", "run.py"]

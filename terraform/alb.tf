@@ -6,72 +6,32 @@ Resources:
 - Security Groups
 *********/
 
-# create a security group to access the ECS application
-resource "aws_security_group" "fp-alb-sg" {
-  name = "fp-app-alb"
-  description = "control access to the application load balancer"
-  vpc_id = aws_vpc.fp-vpc.id
-
-  ingress {
-    from_port = 80
-    protocol = "TCP"
-    to_port = 80
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port = 0
-    protocol = "-1"
-    to_port = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# create security group to access the ecs cluster (traffic to ecs cluster should only come from the ALB)
-resource "aws_security_group" "fp-ecs-sg" {
-  name = "fp-app-ecs-from-alb"
-  description = "control access to the ecs cluster"
-  vpc_id = aws_vpc.fp-vpc.id
-
-  ingress {
-    from_port = var.flask_app_port
-    protocol = "TCP"
-    to_port = var.flask_app_port
-    security_groups = [aws_security_group.fp-alb-sg.id]
-  }
-
-  egress {
-    protocol = "-1"
-    from_port = 0
-    to_port = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 # create the ALB
-resource "aws_alb" "fp-alb" {
+resource "aws_alb" "application_load_balancer" {
+  name               = "mywallst-lb-tf" # Naming our load balancer
   load_balancer_type = "application"
-  name = "fp-alb"
-  subnets = aws_subnet.fp-public-subnets.*.id
-  security_groups = [aws_security_group.fp-alb-sg.id]
+  subnets = [ # Referencing the default subnets
+    "${aws_default_subnet.default_subnet_a.id}",
+    "${aws_default_subnet.default_subnet_b.id}",
+    "${aws_default_subnet.default_subnet_c.id}"
+  ]
+  # Referencing the security group
+  security_groups = ["${aws_security_group.load_balancer_security_group.id}"]
 }
 
-# point redirected traffic to the app
-resource "aws_alb_target_group" "fp-target-group" {
-  name = "fp-ecs-target-group"
-  port = 80
-  protocol = "HTTP"
-  vpc_id = aws_vpc.fp-vpc.id
-  target_type = "ip"
-}
+# Creating a security group for the load balancer:
+resource "aws_security_group" "load_balancer_security_group" {
+  ingress {
+    from_port   = 80 # Allowing traffic in from port 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allowing traffic in from all sources
+  }
 
-# direct traffic through the ALB
-resource "aws_alb_listener" "fp-alb-listener" {
-  load_balancer_arn = aws_alb.fp-alb.arn
-  port = 80
-  protocol = "HTTP"
-  default_action {
-    target_group_arn = aws_alb_target_group.fp-target-group.arn
-    type = "forward"
+  egress {
+    from_port   = 0 # Allowing any incoming port
+    to_port     = 0 # Allowing any outgoing port
+    protocol    = "-1" # Allowing any outgoing protocol
+    cidr_blocks = ["0.0.0.0/0"] # Allowing traffic out to all IP addresses
   }
 }

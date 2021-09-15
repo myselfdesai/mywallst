@@ -12,6 +12,7 @@ flask-wtf = "*"
 wtforms = "*"
 email-validator = "*"
 flask-login = "*"
+uvicorn = "*"
 
 [requires]
 python_version = "3.6"

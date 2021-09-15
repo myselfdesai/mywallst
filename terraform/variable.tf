@@ -30,7 +30,7 @@ variable "private_cidrs" {
 
 variable "flask_app_image" {
   description = "ECR image for flask-app"
-  default = "861354757748.dkr.ecr.us-east-1.amazonaws.com/flask-docker-mywallst-app:latest"
+  default = "861354757748.dkr.ecr.eu-west-2.amazonaws.com/mywallst:latest"
 }
 
 variable "flask_app_port" {
