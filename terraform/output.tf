@@ -1,3 +1,4 @@
-# output "alb-dns-name" {
-#   value = aws_alb.fp-alb.dns_name
-# }
+output "alb_dns_name" {
+  description = "The Application Load Balancer DNS name"
+  value       = aws_lb.main.*.dns_name[0]
+}

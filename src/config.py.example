@@ -1,0 +1,8 @@
+class Config(object):
+
+  SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
+  SECRET_KEY = 'provide_your_secret_key'
+  STRIPE_SECRET_KEY = 'sk_test_xxxx_stripe_secreat_key'
+  STRIPE_PUBLISHABLE_KEY = 'pk_test_xxxx_stripe_publishable_key'
+  STRIPE_PRICE_ID = 'price_xxxx_stripe_priceid'
+  STRIPE_ENDPOINT_SECRET = 'whsec_xxxx_stripe_endpoint_for_webhook'
